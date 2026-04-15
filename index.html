@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Farhan Urfa Kebap - QR Menu</title>
+    <meta
+      name="description"
+      content="Farhan Urfa Kebap Dünyası için mobil uyumlu QR menü."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="top-header">
+      <div class="brand-wrap">
+        <img
+          id="brand-logo"
+          class="brand-logo"
+          src="./assets/farhan-logo.png"
+          alt="Farhan Urfa Kebap Dünyası logosu"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </div>
+      <div class="header-actions">
+        <label class="lang-select-wrap" for="lang-select">
+          <span id="lang-flag" class="lang-flag" aria-hidden="true">🇹🇷</span>
+          <select id="lang-select" class="lang-select" aria-label="Dil secimi">
+            <option value="tr">Turkce</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <main id="app" class="app-shell">
+      <section id="loading-state" class="state-card">
+        <p class="state-title">Menü yükleniyor...</p>
+        <p class="state-subtitle">Lütfen bekleyin.</p>
+      </section>
+
+      <section id="error-state" class="state-card hidden" role="alert">
+        <p class="state-title">Menü yüklenemedi</p>
+        <p class="state-subtitle">
+          Google Sheets bağlantısını ve yayın ayarlarını kontrol edin.
+        </p>
+      </section>
+
+      <section id="menu-content" class="menu-content hidden" aria-live="polite"></section>
+    </main>
+
+    <nav id="mobile-menu-bar" class="mobile-menu-bar hidden" aria-label="Kategori menüsü"></nav>
+
+    <div id="image-modal" class="image-modal hidden" role="dialog" aria-modal="true" aria-label="Gorsel onizleme">
+      <button id="image-modal-close" class="image-modal-close" type="button" aria-label="Kapat">✕</button>
+      <img id="image-modal-img" class="image-modal-img" src="" alt="" />
+    </div>
+
+    <div id="language-welcome-modal" class="language-welcome-modal hidden" role="dialog" aria-modal="true" aria-label="Dil secimi">
+      <div class="language-welcome-card">
+        <h2 id="language-welcome-title" class="language-welcome-title">Dil Secin</h2>
+        <p id="language-welcome-text" class="language-welcome-text">Lutfen menu dilini secin.</p>
+        <div class="language-welcome-actions">
+          <button id="language-welcome-tr" class="language-welcome-btn" type="button">🇹🇷 Turkce</button>
+          <button id="language-welcome-en" class="language-welcome-btn language-welcome-btn-secondary" type="button">🇬🇧 English</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
