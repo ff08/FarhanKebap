@@ -8,12 +8,12 @@ const CONFIG = {
   currency: "TL",
   // Buraya kendi isletme linklerinizi ekleyin.
   googleMapsReviewUrl: "https://maps.google.com/",
-  instagramUrl: "https://instagram.com/",
+  instagramUrl: "https://www.instagram.com/farhanurfakebapdunyasi",
   menuUpdatedAt: "2026-04-15",
   policyLinks: {
-    privacy: "https://farhankebap.com/privacy-policy",
-    terms: "https://farhankebap.com/terms",
-    kvkk: "https://farhankebap.com/kvkk"
+    privacy: "https://farhankebap.com/gizlilik-politikasi",
+    terms: "https://farhankebap.com/kullanim-sartlari",
+    cookies: "https://farhankebap.com/cerez-politikasi"
   },
   cacheTtlMs: 5 * 60 * 1000
 };
@@ -34,7 +34,7 @@ const UI_TEXT = {
     updatedAt: "Menu guncelleme tarihi:",
     privacyPolicy: "Gizlilik Politikasi",
     terms: "Kullanim Sartlari",
-    kvkk: "KVKK",
+    cookiePolicy: "Cerez Politikasi",
     languageModalTitle: "Dil Secin",
     languageModalText: "Lutfen menu dilini secin."
   },
@@ -53,7 +53,7 @@ const UI_TEXT = {
     updatedAt: "Menu updated:",
     privacyPolicy: "Privacy Policy",
     terms: "Terms of Use",
-    kvkk: "Personal Data Policy",
+    cookiePolicy: "Cookie Policy",
     languageModalTitle: "Choose Language",
     languageModalText: "Please select your menu language."
   }
@@ -353,7 +353,7 @@ function renderFooterInfo(t) {
   const updated = formatUpdatedDate(CONFIG.menuUpdatedAt, state.lang);
   const privacyUrl = escapeHtml(CONFIG.policyLinks?.privacy || "#");
   const termsUrl = escapeHtml(CONFIG.policyLinks?.terms || "#");
-  const kvkkUrl = escapeHtml(CONFIG.policyLinks?.kvkk || "#");
+  const cookiesUrl = escapeHtml(CONFIG.policyLinks?.cookies || "#");
 
   return `
     <section class="menu-footer">
@@ -361,7 +361,7 @@ function renderFooterInfo(t) {
       <div class="policy-links">
         <a class="policy-link" href="${privacyUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.privacyPolicy)}</a>
         <a class="policy-link" href="${termsUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.terms)}</a>
-        <a class="policy-link" href="${kvkkUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.kvkk)}</a>
+        <a class="policy-link" href="${cookiesUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.cookiePolicy)}</a>
       </div>
     </section>
   `;
@@ -437,7 +437,6 @@ function showMenu() {
   els.errorState.classList.add("hidden");
   els.menuContent.classList.remove("hidden");
   els.mobileMenuBar.classList.remove("hidden");
-  els.mobileMenuBar.classList.remove("menu-hidden-scroll");
   els.topHeader.classList.remove("header-hidden-scroll");
 }
 
@@ -559,7 +558,6 @@ function setupMenuBarScrollVisibility() {
       const delta = currentY - lastScrollY;
 
       if (currentY < 24) {
-        els.mobileMenuBar.classList.remove("menu-hidden-scroll");
         els.topHeader.classList.remove("header-hidden-scroll");
         lastScrollY = currentY;
         return;
@@ -570,10 +568,8 @@ function setupMenuBarScrollVisibility() {
       }
 
       if (delta > 0) {
-        els.mobileMenuBar.classList.add("menu-hidden-scroll");
         els.topHeader.classList.add("header-hidden-scroll");
       } else {
-        els.mobileMenuBar.classList.remove("menu-hidden-scroll");
         els.topHeader.classList.remove("header-hidden-scroll");
       }
 
