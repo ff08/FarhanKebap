@@ -24,7 +24,6 @@ const UI_TEXT = {
     loadingSubtitle: "Lutfen bekleyin.",
     errorTitle: "Menu yuklenemedi",
     errorSubtitle: "Google Sheets baglantisini ve yayin ayarlarini kontrol edin.",
-    allergens: "Alerjen:",
     weight: "Gramaj:",
     free: "Ikram",
     socialProofTitle: "Yorumlar ve Sosyal Kanit",
@@ -43,7 +42,6 @@ const UI_TEXT = {
     loadingSubtitle: "Please wait.",
     errorTitle: "Menu could not be loaded",
     errorSubtitle: "Check your Google Sheets link and publish settings.",
-    allergens: "Allergens:",
     weight: "Weight:",
     free: "Complimentary",
     socialProofTitle: "Reviews and Social Proof",
@@ -84,6 +82,7 @@ const els = {
 };
 
 let lastScrollY = window.scrollY;
+let activeCategoryRaf = 0;
 const LANGUAGE_MODAL_SEEN_KEY = "farhan-menu-language-modal-seen-v1";
 const LANGUAGE_PREF_KEY = "farhan-menu-language-pref-v1";
 const MENU_CACHE_KEY = "farhan-menu-sheet-cache-v1";
@@ -219,8 +218,6 @@ function parseMenuRows(sheetGroups) {
         enName: productEn,
         trDescription: row.urun_icerigi || row.description_tr || "",
         enDescription: row.urun_icerigi_en || row.description_en || row.urun_icerigi || "",
-        trAllergen: row.alerjen_madde || row.allergens_tr || "",
-        enAllergen: row.alerjen_madde_en || row.allergens_en || row.alerjen_madde || "",
         weight: row.gramaj || row.weight || "",
         price: parsedPrice,
         imageUrl: row.urun_gorseli_link || row.image_url || row.gorsel_link || ""
@@ -261,8 +258,8 @@ function setStateText() {
 function render() {
   renderCategories();
   renderMenuBar();
-  setupSectionObserver();
   bindDynamicEvents();
+  scheduleActiveCategoryUpdate();
 }
 
 function renderCategories() {
@@ -288,7 +285,6 @@ function renderCategories() {
 function renderItemCard(item, t) {
   const name = state.lang === "tr" ? item.trName : item.enName;
   const description = state.lang === "tr" ? item.trDescription : item.enDescription;
-  const allergen = state.lang === "tr" ? item.trAllergen : item.enAllergen;
   const image = item.imageUrl || "./assets/no-image.svg";
   const price = item.price ? item.price : t.free;
 
@@ -302,11 +298,6 @@ function renderItemCard(item, t) {
         </div>
         ${description ? `<p class="item-desc">${escapeHtml(description)}</p>` : ""}
         ${item.weight ? `<p class="item-meta">${t.weight} ${escapeHtml(item.weight)}</p>` : ""}
-        ${
-          allergen
-            ? `<p class="item-meta"><span class="allergen-label">${t.allergens}</span>${escapeHtml(allergen)}</p>`
-            : ""
-        }
       </div>
     </article>
   `;
@@ -388,26 +379,44 @@ function bindDynamicEvents() {
   });
 }
 
-function setupSectionObserver() {
-  const sections = [...document.querySelectorAll(".category-section")];
-  if (!sections.length) return;
+function getCategoryActivationLineY() {
+  return (els.topHeader?.offsetHeight ?? 96) + 6;
+}
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!visible) return;
-      state.activeCategoryId = visible.target.id;
-      highlightActiveChip();
-    },
-    {
-      rootMargin: "-25% 0px -65% 0px",
-      threshold: [0.2, 0.5, 0.8]
+function scheduleActiveCategoryUpdate() {
+  if (activeCategoryRaf) return;
+  activeCategoryRaf = requestAnimationFrame(() => {
+    activeCategoryRaf = 0;
+    updateActiveCategoryFromScroll();
+  });
+}
+
+function updateActiveCategoryFromScroll() {
+  if (!state.categories.length) return;
+  const lineY = getCategoryActivationLineY();
+  let activeId = state.categories[0].id;
+
+  for (const category of state.categories) {
+    const section = document.getElementById(category.id);
+    if (!section) continue;
+    const top = section.getBoundingClientRect().top;
+    if (top <= lineY) {
+      activeId = category.id;
     }
-  );
+  }
 
-  sections.forEach((section) => observer.observe(section));
+  if (state.activeCategoryId !== activeId) {
+    state.activeCategoryId = activeId;
+    highlightActiveChip();
+    scrollActiveChipIntoView();
+  }
+}
+
+function scrollActiveChipIntoView() {
+  const chip = els.mobileMenuBar.querySelector(
+    `.category-chip[data-target="${CSS.escape(state.activeCategoryId)}"]`
+  );
+  chip?.scrollIntoView({ block: "nearest", inline: "center" });
 }
 
 function highlightActiveChip() {
@@ -551,32 +560,34 @@ function setupLanguageWelcomeFlow() {
 }
 
 function setupMenuBarScrollVisibility() {
-  window.addEventListener(
-    "scroll",
-    () => {
-      const currentY = window.scrollY;
-      const delta = currentY - lastScrollY;
+  const onScroll = () => {
+    const currentY = window.scrollY;
+    const delta = currentY - lastScrollY;
 
-      if (currentY < 24) {
-        els.topHeader.classList.remove("header-hidden-scroll");
-        lastScrollY = currentY;
-        return;
-      }
-
-      if (Math.abs(delta) < 8) {
-        return;
-      }
-
-      if (delta > 0) {
-        els.topHeader.classList.add("header-hidden-scroll");
-      } else {
-        els.topHeader.classList.remove("header-hidden-scroll");
-      }
-
+    if (currentY < 24) {
+      els.topHeader.classList.remove("header-hidden-scroll");
       lastScrollY = currentY;
-    },
-    { passive: true }
-  );
+      scheduleActiveCategoryUpdate();
+      return;
+    }
+
+    if (Math.abs(delta) < 8) {
+      scheduleActiveCategoryUpdate();
+      return;
+    }
+
+    if (delta > 0) {
+      els.topHeader.classList.add("header-hidden-scroll");
+    } else {
+      els.topHeader.classList.remove("header-hidden-scroll");
+    }
+
+    lastScrollY = currentY;
+    scheduleActiveCategoryUpdate();
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", scheduleActiveCategoryUpdate, { passive: true });
 }
 
 async function bootstrap() {

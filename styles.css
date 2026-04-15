@@ -6,7 +6,6 @@
   --text-muted: #c5b08f;
   --accent: #d6ab73;
   --accent-soft: #3a2a1b;
-  --danger: #ff6b6b;
   --radius-lg: 16px;
   --radius-md: 12px;
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -207,12 +206,6 @@ body {
 
 .item-meta {
   font-size: 0.75rem;
-}
-
-.item-meta .allergen-label {
-  color: var(--danger);
-  font-weight: 700;
-  margin-right: 4px;
 }
 
 .mobile-menu-bar {
